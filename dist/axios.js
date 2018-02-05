@@ -1,4 +1,3 @@
-/* axios v0.17.1 | (c) 2017 by Matt Zabriskie */
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')
 		module.exports = factory();
@@ -448,7 +447,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	/*!
 	 * Determine if an object is a Buffer
 	 *
-	 * @author   Feross Aboukhadijeh <feross@feross.org> <http://feross.org>
+	 * @author   Feross Aboukhadijeh <https://feross.org>
 	 * @license  MIT
 	 */
 	
@@ -695,6 +694,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var request = new XMLHttpRequest();
 	    var loadEvent = 'onreadystatechange';
 	    var xDomain = false;
+	    var XDomainNum = '';
 	
 	    // For IE 8/9 CORS support
 	    // Only supports POST and GET calls and doesn't returns the response headers.
@@ -706,6 +706,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	      request = new window.XDomainRequest();
 	      loadEvent = 'onload';
 	      xDomain = true;
+	      XDomainName = 'axiosRequest' + (new Date()).getTime();
+	      window[XDomainName] = request;
 	      request.onprogress = function handleProgress() {};
 	      request.ontimeout = function handleTimeout() {};
 	    }
@@ -724,6 +726,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	    // Listen for ready state
 	    request[loadEvent] = function handleLoad() {
+	      if (xDomain && XDomainName) {
+	        window[XDomainName] = null;
+	      }
+	
 	      if (!request || (request.readyState !== 4 && !xDomain)) {
 	        return;
 	      }
@@ -757,6 +763,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	    // Handle low level network errors
 	    request.onerror = function handleError() {
+	      if (xDomain && XDomainName) {
+	        window[XDomainName] = null;
+	      }
+	
 	      // Real errors are hidden from us by the browser
 	      // onerror should only fire if it's a network error
 	      reject(createError('Network Error', config, null, request));
@@ -767,6 +777,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	    // Handle timeout
 	    request.ontimeout = function handleTimeout() {
+	      if (xDomain && XDomainName) {
+	        window[XDomainName] = null;
+	      }
+	
 	      reject(createError('timeout of ' + config.timeout + 'ms exceeded', config, 'ECONNABORTED',
 	        request));
 	
@@ -985,9 +999,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	      if (utils.isArray(val)) {
 	        key = key + '[]';
-	      }
-	
-	      if (!utils.isArray(val)) {
+	      } else {
 	        val = [val];
 	      }
 	
